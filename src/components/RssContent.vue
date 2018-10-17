@@ -1,7 +1,6 @@
 <template>
   <div class="container-fluid">
     <div class="text-center">
-      <p>{{addedApiList.rssFeed}}</p>
       <button class="btn btn-primary" @click="rssModalShow = !rssModalShow">Rss Reader <i class="fas fa-plus-square icon-size"></i></button>
       <b-modal v-model="rssModalShow">
           <p>Pick a RSS you would like to add to page</p>
@@ -85,7 +84,7 @@ export default {
           saved: false
         },
       ],
-      addedApiList: []
+      addedApiList: [],
     };
   },
   computed: {
@@ -98,6 +97,7 @@ export default {
   methods: {
     removeRss(x, index) {
       this.addedApiList.splice(index,1)
+      // this.addedApiNameList.splice(index,1)
       this.rssList.forEach(i => {
         if(i.name == x.name)
           i.saved = false
@@ -120,11 +120,13 @@ export default {
             link: api,
             rssFeed: response.data
           });
-          // console.log('resp' + response)
+          // this.addedApiNameList.push(this.selected.name)
         })
         .catch(err => {
             console.log('err ' + err.response.data);
         });
+      
+        this.$store.dispatch('updateProfile', this.selected.name)
     },
   }
 };

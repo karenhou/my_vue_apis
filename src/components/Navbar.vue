@@ -24,9 +24,7 @@
                 <app-weather></app-weather>
             </div>
             <div class="log">
-                <!-- <div class="btn btn-primary btn-sm" @click="login" v-if="!authorized">Login</div> -->
                 <div class="btn btn-primary btn-sm" @click="onLogin" v-if="!authorized">Login</div>
-                <!-- <p>{{$store.state.user.user}}</p> -->
                 <img v-show="$store.state.user" :src="profilePicture" alt="profile" class="login-icon" @click="userModalShow = !userModalShow" >
                 <b-modal v-model="userModalShow" class="text-center">
                     <p>Would you like to...</p>
@@ -60,7 +58,8 @@ export default {
             return this.$store.getters.isAuthenticated
         },
         profilePicture () {
-            return (this.$store.getters.user) ? `https://graph.facebook.com/${this.$store.getters.user.user.id}/picture?width=300` : `/static/man.gif`
+            return (this.$store.getters.user) ? this.$store.getters.user.data.photoURL : `/static/man.gif`
+        
         }
     },
     components: {
@@ -68,16 +67,16 @@ export default {
     },
     methods: {
         onLogin() {
-            this.$store.dispatch('login')
+            this.$store.dispatch('loginWithFB')
             console.log('after login ' ,this.$store.getters.user)
         },
         onLogout() {
             this.userModalShow = !this.userModalShow
-            this.$store.dispatch('logout')
+            this.$store.dispatch('logoutFB')
         },
         goToUserProfile() {
             this.userModalShow = !this.userModalShow
-            this.$router.push({ name: 'userProfile', params: { userId: this.$store.getters.user.user.id}})
+            this.$router.push({ name: 'userProfile', params: { userId: this.$store.getters.user.data.uid}})
         }
     },
 }

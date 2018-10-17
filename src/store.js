@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import router from './router'
+import firebase from 'firebase'
+import db from '@/firebase/init'
 
 Vue.use(Vuex)
 
@@ -8,7 +10,8 @@ export default new Vuex.Store({
     state: {
         accessToken: null,
         user: null,
-        authorized: false
+        authorized: false,
+        selectedList: []
     },
     mutations: {
         authUser(state, userData) {
@@ -22,91 +25,103 @@ export default new Vuex.Store({
             state.user = null
             state.authorized = false
             state.accessToken = null
+            state.selectedList = null
+        },
+        storeList(state, userData) {
+            state.selectedList.push(userData)
         }
     },
     actions: {
-        statusChangeCallback({commit, dispatch}, response) {
-            console.log('vm in stat callback', response.status)
-            if(response.status === 'connected') {
-                console.log('connected ' ,response)
+        updateProfile({commit}, userData) {
+            console.log('update profile' ,this.state.user.data.uid)
+            commit('storeList', userData)
+            db.collection('users').where('user_id', '==',this.state.user.data.uid).get().then(snapshot => {
+                // console.log('snap ', snapshot)
+                // console.log(userData)
+                snapshot.forEach((doc) => {
+                    db.collection('users').doc(doc.id).update({
+                      rssList: this.state.selectedList
+                    }).then(()=> {
+                        // commit('storeList', userData)
+                    })
+                  });
+            })
+        },
+        getProfile({commit}, uid) {
+            //console.log('get profile user', state.user.data)
+            db.collection('users').where('user_id', '==', uid).get().then(snapshot => {
+                // console.log('in get profile ', doc)
+                snapshot.forEach((doc) => {
+                    console.log(doc.data().rssList)
+                    commit('storeList', doc.data().rssList)
+                  });
+            })
+        },
+        loginWithCreditials({commit, dispatch, state}){
+            let mytoken = localStorage.getItem('myToken')
+            // console.log('in auto login mytoken = ', mytoken)
+
+            if(mytoken == null) return
+
+            var credential = firebase.auth.FacebookAuthProvider.credential(mytoken);
+
+            firebase.auth().signInAndRetrieveDataWithCredential(credential).then(result =>{
+                // console.log('auto signin ', result)
                 commit('authUser', {
-                    accessToken: response.authResponse.accessToken,
+                    accessToken: result.credential.accessToken,
                     authorized: true,
                 })
-                localStorage.setItem('myToken', response.authResponse.accessToken);
-                localStorage.setItem('myId', response.authResponse.userID);
-                localStorage.setItem('expirationDate', response.authResponse.expiresIn);
-                dispatch('getProfile');
-                // vm.authorized = true
-                // vm.getProfile()
-            } else if(response.status === 'not_authorized') {
-                // vm.authorized = false
-                commit('authUser', {
-                    accessToken: null,
-                    authorized: false,
-                })
-                router.replace('/');
-            } else if(response.status === 'unknown') {
-                // vm.profile = {}
-                // vm.authorized = false
-                commit('clearUser')
-                router.replace('/');
-            } else {
-                // vm.authorized = false
-                commit('clearUser')
-                router.replace('/');
-            }
-            
-        },
-        init({dispatch}) {
-            window.fbAsyncInit = function() {
-                FB.init({
-                    appId      : '903689369825176',
-                    cookie     : true,
-                    xfbml      : true,
-                    version    : 'v3.1'
-                });
-                FB.AppEvents.logPageView();
-                console.log('fbAsyncInit')
-    
-                FB.getLoginStatus(response => {
-                    console.log('in init get status')
-                    dispatch('statusChangeCallback', response);
-                }, true);
-            };
-        },
-        getProfile({commit}) {
-            FB.api('/me?fields=name,id,email', response => {
+
                 commit('storeUser', {
-                    user: response
+                    data: result.user.providerData[0]
                 })
-            })
-            
+                console.log('udi ', result.user.providerData[0].uid)
+                dispatch('getProfile', result.user.providerData[0].uid)
+            });
+            //console.log('in auto login ', this.state.getters.user)
+            // console.log('in auto login ', this.state.user)
+           
         },
-        login({dispatch}) {
-            FB.login(response => {
-                console.log('login ', response)
-                dispatch('statusChangeCallback', response);
+        loginWithFB({commit}) {
+            var provider = new firebase.auth.FacebookAuthProvider();
+            provider.setCustomParameters({
+                'display': 'popup'
+              });
+
+            firebase.auth().signInWithPopup(provider).then(result => {
+                console.log(result)
+                if(result.additionalUserInfo.isNewUser === true) {
+                    db.collection('users').add({
+                        user_name: result.user.providerData[0].displayName,
+                        user_id: result.user.providerData[0].uid,
+                        email: result.user.providerData[0].email,
+                    })
+                }
+          
+                commit('authUser', {
+                    accessToken: result.credential.accessToken,
+                    authorized: true,
+                })
                 
-            }, {
-                scope: 'email, public_profile', 
-                return_scopes: true
+                commit('storeUser', {
+                    data: result.user.providerData[0]
+                })
+                console.log(result.user.providerData[0])
+                localStorage.setItem('myToken', result.credential.accessToken);
+            }).catch(error => {
+                console.log(error)
             });
             
         },
-        logout({dispatch}) {
-            localStorage.removeItem('expirationDate')
-            localStorage.removeItem('myToken')
-            localStorage.removeItem('myId')
-            FB.logout(response => {
-                dispatch('statusChangeCallback', response);
-            })
-            // if(this.state.accessToken) {
-            //     FB.logout(response => {
-            //         dispatch('statusChangeCallback', response);
-            //     })
-            // }
-            
+        logoutFB({commit}) {
+            firebase.auth().signOut().then(() => {
+                // Sign-out successful.
+                commit('clearUser')
+              }).catch(error => {
+                // An error happened.
+                console.log(error)
+              });
+              localStorage.removeItem('myToken')
         },
     },
     getters: {
@@ -115,6 +130,12 @@ export default new Vuex.Store({
         },
         isAuthenticated(state) {
             return state.authorized
+        },
+        token(state) {
+            return state.accessToken
+        },
+        list(state) {
+            return state.selectedList
         }
     }
 });
