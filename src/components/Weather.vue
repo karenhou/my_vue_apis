@@ -23,6 +23,8 @@ export default {
             axios.get(link).then(response => {
                 this.info = response.data
                 this.weatherIcon = 'http://openweathermap.org/img/w/'+ this.info.weather[0].icon+'.png'
+            }).catch(err => {
+                console.log(err)
             })
         }
     },

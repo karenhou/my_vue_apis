@@ -17,13 +17,16 @@
 import Navbar from '@/components/Navbar.vue'
 
 export default {
-  name: 'Home',
+  name: 'App',
   data() {
     return {
     }
   },
   components: {
     appNavbar: Navbar
+  },
+  created(){
+    this.$store.dispatch('init')
   }
 }
 </script>

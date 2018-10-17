@@ -29,7 +29,7 @@ export default new Router({
     {
       path: '/userProfile/:userId',
       name: 'userProfile',
-      component: () => import(/* webpackChunkName: "about" */ './views/userProfile.vue')
+      component: () => import(/* webpackChunkName: "about" */ './views/userProfile.vue'),
     },
     { path: '*', redirect: '/' }
   ]

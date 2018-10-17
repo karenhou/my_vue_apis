@@ -15,6 +15,9 @@ export default {
   components: {
     appCarousel: Carousel,
     appRssContent: RssContent
+  },
+  created() {
+    
   }
 };
 </script>

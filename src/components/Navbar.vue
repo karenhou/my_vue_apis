@@ -24,12 +24,14 @@
                 <app-weather></app-weather>
             </div>
             <div class="log">
-                <div class="btn btn-primary btn-sm" @click="login" v-if="!authorized">Login</div>
-                <img v-show="profile.name" :src="profilePicture" alt="profile" class="login-icon" @click="userModalShow = !userModalShow" >
+                <!-- <div class="btn btn-primary btn-sm" @click="login" v-if="!authorized">Login</div> -->
+                <div class="btn btn-primary btn-sm" @click="onLogin" v-if="!authorized">Login</div>
+                <!-- <p>{{$store.state.user.user}}</p> -->
+                <img v-show="$store.state.user" :src="profilePicture" alt="profile" class="login-icon" @click="userModalShow = !userModalShow" >
                 <b-modal v-model="userModalShow" class="text-center">
                     <p>Would you like to...</p>
                     <div slot="modal-footer" class="w-100">
-                        <b-btn size="sm" class="float-center modal-btn btn btn-danger" variant="primary" @click="logout">
+                        <b-btn size="sm" class="float-center modal-btn btn btn-danger" variant="primary" @click="onLogout">
                         LogOut
                         </b-btn>
                         <b-btn size="sm" class="float-center modal-btn btn" variant="primary" @click="goToUserProfile">
@@ -50,90 +52,34 @@ export default {
     name: 'Navbar',
     data() {
         return {
-            profile: {},
-            authorized: false,
             userModalShow: false
         }
     },
     computed: {
+        authorized() {
+            return this.$store.getters.isAuthenticated
+        },
         profilePicture () {
-            return (this.profile.id) ? `https://graph.facebook.com/${this.profile.id}/picture?width=300` : `/static/man.gif`
-        },
-        msg () {
-            if (this.profile.name) {
-                return `Welcome <b><i> ${this.profile.name} </i></b> to Vue.js App`
-            } else {
-                return 'Login Facebook to Enjoy the App'
-            }
-        },
+            return (this.$store.getters.user) ? `https://graph.facebook.com/${this.$store.getters.user.user.id}/picture?width=300` : `/static/man.gif`
+        }
     },
     components: {
         appWeather: Weather
     },
     methods: {
-        statusChangeCallback(response) {
-            let vm = this
-            console.log('vm in stat callback', response)
-            if(response.status === 'connected') {
-                vm.authorized = true
-                vm.getProfile()
-            } else if(response.status === 'not_authorized') {
-                vm.authorized = false
-            } else if(response.status === 'unknown') {
-                vm.profile = {}
-                vm.authorized = false
-            } else {
-                vm.authorized = false
-            }
-            this.$router.push({ name: 'home'});
+        onLogin() {
+            this.$store.dispatch('login')
+            console.log('after login ' ,this.$store.getters.user)
         },
-        getProfile() {
-            let vm = this
-            FB.api('/me?fields=name,id,email', function (response) {
-                console.log('res in getProfile', response)
-                vm.$set(vm, 'profile', response)
-            })
-            
-        },
-        login() {
-            let vm = this
-            FB.login(function(response) {
-                vm.statusChangeCallback(response)
-            }, {
-                scope: 'email, public_profile', 
-                return_scopes: true
-            });
-            
-        },
-        logout() {
+        onLogout() {
             this.userModalShow = !this.userModalShow
-            let vm = this
-            FB.logout(response => {
-                vm.statusChangeCallback(response)
-            })
+            this.$store.dispatch('logout')
         },
         goToUserProfile() {
             this.userModalShow = !this.userModalShow
-            this.$router.push({ name: 'userProfile', params: { userId: this.profile.id, profile: this.profile }})
+            this.$router.push({ name: 'userProfile', params: { userId: this.$store.getters.user.user.id}})
         }
     },
-    mounted () {
-        window.fbAsyncInit = function() {
-            FB.init({
-                appId      : '903689369825176',
-                cookie     : true,
-                xfbml      : true,
-                version    : 'v3.1'
-            });
-            FB.AppEvents.logPageView();
-            console.log('fbAsyncInit')
-
-            FB.getLoginStatus(response => {
-                this.statusChangeCallback(response);
-            }, true);
-        };
-        console.log('loaded navbar')
-    }
 }
 </script>
 
