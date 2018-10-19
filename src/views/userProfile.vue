@@ -21,12 +21,9 @@ export default {
     },
     mounted() {
         let mytoken = localStorage.getItem('myToken')
-        if(mytoken){
-            // console.log('in auto login mytoken = ', mytoken)
-        } else {
+        if(!mytoken){
             router.replace('/')
         }
-        // this.$store.dispatch('getProfile', this.$store.getters.user.data.uid)
     }
     
 }

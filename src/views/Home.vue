@@ -17,7 +17,10 @@ export default {
     appRssContent: RssContent
   },
   created() {
-    
+    if(this.$store.getters.isAuthenticated) {
+      let uid = localStorage.getItem('uid')
+      this.$store.dispatch('getProfile', uid)
+    }
   }
 };
 </script>

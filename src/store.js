@@ -1,17 +1,19 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import router from './router'
 import firebase from 'firebase'
 import db from '@/firebase/init'
+import axios from "axios";
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
     state: {
+        rssAPIKeys: '1eeiobvm5s07o4thvz1xttbunqs3ufo1dddout7c',
         accessToken: null,
         user: null,
         authorized: false,
-        selectedList: []
+        selectedList: [],
+        rssContent:[],
     },
     mutations: {
         authUser(state, userData) {
@@ -25,48 +27,80 @@ export default new Vuex.Store({
             state.user = null
             state.authorized = false
             state.accessToken = null
-            state.selectedList = null
+            state.selectedList = []
+            state.rssContent = []
         },
         storeList(state, userData) {
             state.selectedList.push(userData)
-        }
+        },
+        storeContent(state, userData) {
+            state.rssContent.push(userData.data)
+        },
     },
     actions: {
-        updateProfile({commit}, userData) {
-            console.log('update profile' ,this.state.user.data.uid)
+        updateProfile({commit, state, dispatch}, userData) {
             commit('storeList', userData)
-            db.collection('users').where('user_id', '==',this.state.user.data.uid).get().then(snapshot => {
-                // console.log('snap ', snapshot)
-                // console.log(userData)
+            db.collection('users').where('user_id', '==', state.user.data.uid).get().then(snapshot => {
                 snapshot.forEach((doc) => {
                     db.collection('users').doc(doc.id).update({
-                      rssList: this.state.selectedList
+                        rssList: state.selectedList
                     }).then(()=> {
-                        // commit('storeList', userData)
+                        dispatch('updateContent', userData)
                     })
-                  });
+                });
             })
         },
-        getProfile({commit}, uid) {
-            //console.log('get profile user', state.user.data)
+        updateContent({commit}, userData) {
+                let api =
+        "https://api.rss2json.com/v1/api.json?api_key=" + this.state.rssAPIKeys + "&rss_url=" + userData.link;
+            axios
+                .get(api)
+                .then(response => {
+                    commit('storeContent', {data: response.data})
+                })
+                .catch(err => {
+                    console.log('updateContent err ' + err.response);
+                });
+        },
+        //after loading user profile, call to generate all content
+        getContent({commit}) {
+            this.state.selectedList.forEach(x => {
+                let api =
+        "https://api.rss2json.com/v1/api.json?api_key=" + this.state.rssAPIKeys + "&rss_url=" + x.link;
+            axios
+                .get(api)
+                .then(response => {
+                    commit('storeContent', {data: response.data})
+                })
+                .catch(err => {
+                    console.log('getContent err ' + err.response);
+                });
+            })
+        },
+        getProfile({commit, dispatch}, uid) {
+            let temp = []
             db.collection('users').where('user_id', '==', uid).get().then(snapshot => {
-                // console.log('in get profile ', doc)
                 snapshot.forEach((doc) => {
-                    console.log(doc.data().rssList)
-                    commit('storeList', doc.data().rssList)
-                  });
+                    temp = [...doc.data().rssList]
+                });
+                temp.forEach(x => {
+                    commit('storeList', x)
+                })
+                dispatch('getContent')
+            }).catch(err => {
+                console.log('error in getprofile ', err)
             })
         },
-        loginWithCreditials({commit, dispatch, state}){
+        loginWithCreditials({commit, dispatch}){
             let mytoken = localStorage.getItem('myToken')
-            // console.log('in auto login mytoken = ', mytoken)
+            let uid = localStorage.getItem('uid')
 
             if(mytoken == null) return
 
             var credential = firebase.auth.FacebookAuthProvider.credential(mytoken);
 
             firebase.auth().signInAndRetrieveDataWithCredential(credential).then(result =>{
-                // console.log('auto signin ', result)
+
                 commit('authUser', {
                     accessToken: result.credential.accessToken,
                     authorized: true,
@@ -75,25 +109,22 @@ export default new Vuex.Store({
                 commit('storeUser', {
                     data: result.user.providerData[0]
                 })
-                console.log('udi ', result.user.providerData[0].uid)
-                dispatch('getProfile', result.user.providerData[0].uid)
+
+                dispatch('getProfile', uid)
             });
-            //console.log('in auto login ', this.state.getters.user)
-            // console.log('in auto login ', this.state.user)
-           
         },
-        loginWithFB({commit}) {
+        loginWithFB({commit, dispatch}) {
             var provider = new firebase.auth.FacebookAuthProvider();
             provider.setCustomParameters({
                 'display': 'popup'
               });
 
             firebase.auth().signInWithPopup(provider).then(result => {
-                console.log(result)
                 if(result.additionalUserInfo.isNewUser === true) {
                     db.collection('users').add({
                         user_name: result.user.providerData[0].displayName,
                         user_id: result.user.providerData[0].uid,
+                        rssList: [],
                         email: result.user.providerData[0].email,
                     })
                 }
@@ -106,10 +137,11 @@ export default new Vuex.Store({
                 commit('storeUser', {
                     data: result.user.providerData[0]
                 })
-                console.log(result.user.providerData[0])
                 localStorage.setItem('myToken', result.credential.accessToken);
+                localStorage.setItem('uid', result.user.providerData[0].uid);
+                dispatch('getProfile', result.user.providerData[0].uid)
             }).catch(error => {
-                console.log(error)
+                console.log('err in login with FB ', error)
             });
             
         },
@@ -117,11 +149,13 @@ export default new Vuex.Store({
             firebase.auth().signOut().then(() => {
                 // Sign-out successful.
                 commit('clearUser')
+                localStorage.removeItem('myToken')
+                localStorage.removeItem('uid')
               }).catch(error => {
                 // An error happened.
-                console.log(error)
+                console.log('logoutFB ', error)
               });
-              localStorage.removeItem('myToken')
+              
         },
     },
     getters: {
@@ -136,6 +170,9 @@ export default new Vuex.Store({
         },
         list(state) {
             return state.selectedList
-        }
+        },
+        content(state) {
+            return state.rssContent
+        },
     }
 });

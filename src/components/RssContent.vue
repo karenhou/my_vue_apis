@@ -20,28 +20,25 @@
       </b-modal>
     </div>
     <div class="row">
-        <div class="col-sm-4" v-if="addedApiList.length > 0" v-for="(x,index) in addedApiList" :key="index">
+        <div class="col-sm-4" v-if="firestoreRssList.length > 0" v-for="(x,index) in firestoreRssList" :key="index">
           <div class="card text-center" >
             <div class="card-body">
-                <h2 class="card-title">{{x.rssFeed.feed.title}}</h2>
+                <h2 class="card-title">{{x.feed.title}}</h2>
                 <button class="btn btn-outline-danger btn-sm" @click="removeRss(x, index)"><i class="far fa-trash-alt icon-size"></i></button>
-                <!-- <h6 class="card-subtitle mb-2 text-muted"></h6> -->
+                <h6 class="card-subtitle mb-2 text-muted"></h6>
                 <p class="card-text">
-                    <ul v-for="(x, index) in x.rssFeed.items" class="text-left" :key=index>
+                    <ul v-for="(x, index) in x.items" class="text-left" :key=index>
                         <li><a :href=x.link>{{x.title}}</a></li>
                     </ul>
                 </p>
             </div>
           </div>
         </div>
-        <!-- <p v-if="addedApiList.length > 0">{{addedApiList}}</p> -->
     </div>
   </div>
 </template>
 
 <script>
-import axios from "axios";
-
 export default {
   name: "RssContent",
   data() {
@@ -89,15 +86,17 @@ export default {
   },
   computed: {
       activeRssList: function() {
-        return this.rssList.filter( u => {
-          return !u.saved
-      })
-    }
+          return this.rssList.filter( u => {
+            return !u.saved
+        })
+      },
+      firestoreRssList: function() {
+        return this.$store.getters.content
+      }
   },
   methods: {
     removeRss(x, index) {
       this.addedApiList.splice(index,1)
-      // this.addedApiNameList.splice(index,1)
       this.rssList.forEach(i => {
         if(i.name == x.name)
           i.saved = false
@@ -109,26 +108,10 @@ export default {
           x.saved = true
       })
       this.rssModalShow = !this.rssModalShow;
-      const rssAPIs = '1eeiobvm5s07o4thvz1xttbunqs3ufo1dddout7c'
-      const api =
-        "https://api.rss2json.com/v1/api.json?api_key=" + rssAPIs + "&rss_url=" + this.selected.link;
-      axios
-        .get(api)
-        .then(response => {
-          this.addedApiList.push({
-            name: this.selected.name,
-            link: api,
-            rssFeed: response.data
-          });
-          // this.addedApiNameList.push(this.selected.name)
-        })
-        .catch(err => {
-            console.log('err ' + err.response.data);
-        });
-      
-        this.$store.dispatch('updateProfile', this.selected.name)
+      this.$store.dispatch('updateProfile', {name: this.selected.name,
+          link: this.selected.link,})
     },
-  }
+  },
 };
 </script>
 

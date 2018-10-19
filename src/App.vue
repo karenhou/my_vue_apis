@@ -26,10 +26,7 @@ export default {
     appNavbar: Navbar
   },
   created(){
-    // console.log('in app access token ' ,this.$store.getters.token)
     this.$store.dispatch('loginWithCreditials')
-    // this.$store.getter.token
-    // this.$store.dispatch('init')
   }
 }
 </script>
