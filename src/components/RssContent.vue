@@ -23,11 +23,11 @@
         <div class="col-sm-4" v-if="firestoreRssList.length > 0" v-for="(x,index) in firestoreRssList" :key="index">
           <div class="card text-center" >
             <div class="card-body">
-                <h2 class="card-title">{{x.feed.title}}</h2>
-                <button class="btn btn-outline-danger btn-sm" @click="removeRss(x, index)"><i class="far fa-trash-alt icon-size"></i></button>
+                <h2 class="card-title">{{x.data.feed.title}}</h2>
+                <button class="btn btn-outline-danger btn-sm" @click="removeRss(x.name, index)"><i class="far fa-trash-alt icon-size"></i></button>
                 <h6 class="card-subtitle mb-2 text-muted"></h6>
                 <p class="card-text">
-                    <ul v-for="(x, index) in x.items" class="text-left" :key=index>
+                    <ul v-for="(x, index) in x.data.items" class="text-left" :key=index>
                         <li><a :href=x.link>{{x.title}}</a></li>
                     </ul>
                 </p>
@@ -86,21 +86,31 @@ export default {
   },
   computed: {
       activeRssList: function() {
+          this.$store.getters.list.forEach(x =>{
+            this.rssList.forEach(y => {
+              if(x.name == y.name)
+                y.saved = true
+            })
+          })
           return this.rssList.filter( u => {
             return !u.saved
         })
       },
       firestoreRssList: function() {
+        console.log(this.$store.getters.content)
         return this.$store.getters.content
       }
   },
   methods: {
     removeRss(x, index) {
-      this.addedApiList.splice(index,1)
-      this.rssList.forEach(i => {
-        if(i.name == x.name)
-          i.saved = false
-      })
+      // this.addedApiList.splice(index,1)
+      // this.rssList.forEach(i => {
+      //   if(i.name == x.name)
+      //     i.saved = false
+      // })
+      console.log('remove' ,x)
+      this.$store.dispatch('deleteRssList', {name: x})
+      
     },
     addRssContent() {
       this.rssList.forEach(x => {
