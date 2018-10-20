@@ -1,30 +1,31 @@
 <template>
-  <div class="container-fluid">
+  <div class="album pt-4 pb-5 bg-light">
     <div class="text-center">
-      <button class="btn btn-primary" @click="rssModalShow = !rssModalShow">Rss Reader <i class="fas fa-plus-square icon-size"></i></button>
-      <b-modal v-model="rssModalShow">
-          <p>Pick a RSS you would like to add to page</p>
-          <select v-model="selected">
-            <option v-for="(x,index) in activeRssList" :key="index" :value="x">
-              {{ x.name }}
-            </option>
-          </select>
-          <div slot="modal-footer" class="w-100">
-            <b-btn size="sm" class="float-right modal-btn btn" variant="primary" @click="rssModalShow = !rssModalShow">
-              Cancel
-            </b-btn>
-            <b-btn size="sm" class="float-right modal-btn btn" variant="primary" @click="addRssContent()">
-              Ok
-            </b-btn>
-        </div>
-      </b-modal>
+    <button class="btn btn-primary" @click="rssModalShow = !rssModalShow">Rss Reader <i class="fas fa-plus-square icon-size"></i></button>
+    <b-modal v-model="rssModalShow">
+        <p>Pick a RSS you would like to add to page</p>
+        <select v-model="selected">
+          <option v-for="(x,index) in activeRssList" :key="index" :value="x">
+            {{ x.name }}
+          </option>
+        </select>
+        <div slot="modal-footer" class="w-100">
+          <b-btn size="sm" class="float-right modal-btn btn" variant="primary" @click="rssModalShow = !rssModalShow">
+            Cancel
+          </b-btn>
+          <b-btn size="sm" class="float-right modal-btn btn" variant="primary" @click="addRssContent()">
+            Ok
+          </b-btn>
+      </div>
+    </b-modal>
     </div>
-    <div class="row">
+    <div class="container">
+      <div class="row pt-2">
         <div class="col-sm-4" v-if="firestoreRssList.length > 0" v-for="(x,index) in firestoreRssList" :key="index">
           <div class="card text-center" >
             <div class="card-body">
                 <h2 class="card-title">{{x.data.feed.title}}</h2>
-                <button class="btn btn-outline-danger btn-sm" @click="removeRss(x.name, index)"><i class="far fa-trash-alt icon-size"></i></button>
+                <button class="btn btn-outline-danger btn-sm" @click="removeRss(x.name)"><i class="far fa-trash-alt icon-size"></i></button>
                 <h6 class="card-subtitle mb-2 text-muted"></h6>
                 <p class="card-text">
                     <ul v-for="(x, index) in x.data.items" class="text-left" :key=index>
@@ -34,6 +35,7 @@
             </div>
           </div>
         </div>
+      </div>
     </div>
   </div>
 </template>
@@ -46,8 +48,9 @@ export default {
       selected: "",
       rssModalShow: false,
       rssList: [
-        { name: "HackerNewsJobs", 
-          link: "https://hnrss.org/jobs", 
+        {
+          name: "HackerNewsJobs",
+          link: "https://hnrss.org/jobs",
           saved: false
         },
         {
@@ -66,81 +69,72 @@ export default {
           saved: false
         },
         {
-          name: 'NBA',
-          link: 'http://www.nba.com/rss/nba_rss.xml',
+          name: "NBA",
+          link: "http://www.nba.com/rss/nba_rss.xml",
           saved: false
         },
         {
-          name: 'TechWorld',
-          link: 'https://www.techworld.com/rss',
+          name: "TechWorld",
+          link: "https://www.techworld.com/rss",
           saved: false
         },
         {
-          name: 'GameSpot',
-          link: 'https://www.gamespot.com/feeds/game-news/',
+          name: "GameSpot",
+          link: "https://www.gamespot.com/feeds/game-news/",
           saved: false
-        },
+        }
       ],
-      addedApiList: [],
+      addedApiList: []
     };
   },
   computed: {
-      activeRssList: function() {
-          this.$store.getters.list.forEach(x =>{
-            this.rssList.forEach(y => {
-              if(x.name == y.name)
-                y.saved = true
-            })
-          })
-          return this.rssList.filter( u => {
-            return !u.saved
-        })
-      },
-      firestoreRssList: function() {
-        // console.log(this.$store.getters.content)
-        return this.$store.getters.content
-      }
+    activeRssList: function() {
+      this.$store.getters.list.forEach(x => {
+        this.rssList.forEach(y => {
+          if (x.name == y.name) y.saved = true;
+        });
+      });
+      return this.rssList.filter(u => {
+        return !u.saved;
+      });
+    },
+    firestoreRssList: function() {
+      // console.log(this.$store.getters.content)
+      return this.$store.getters.content;
+    }
   },
   methods: {
-    removeRss(x, index) {
+    removeRss(x) {
       // this.addedApiList.splice(index,1)
       // this.rssList.forEach(i => {
       //   if(i.name == x.name)
       //     i.saved = false
       // })
-      console.log('remove' ,x)
-      this.$store.dispatch('deleteRssList', {name: x})
-      
+      console.log("remove", x);
+      this.$store.dispatch("deleteRssList", { name: x });
     },
     addRssContent() {
       this.rssList.forEach(x => {
-        if(x.name == this.selected.name)
-          x.saved = true
-      })
+        if (x.name == this.selected.name) x.saved = true;
+      });
       this.rssModalShow = !this.rssModalShow;
-      this.$store.dispatch('updateProfile', {name: this.selected.name,
-          link: this.selected.link,})
-    },
-  },
+      this.$store.dispatch("updateProfile", {
+        name: this.selected.name,
+        link: this.selected.link
+      });
+    }
+  }
 };
 </script>
 
 
 <style>
-.row {
-  margin-top: 1em;
-}
-
-.btn {
-  margin-right: 1em;
-}
 .modal-btn {
   margin-left: 1em;
 }
 
 .apiBtn {
-  background-color: #FFC500;
+  background-color: #ffc500;
   color: white;
 }
-
 </style>

@@ -1,6 +1,7 @@
 <template>
-  <div id="carousel" class="container">
-    <b-carousel id="carousel1"
+  <div id="carousel" class='pt-5 pb-5 container-fluid mt-5'>
+    <section class="text-center container">
+        <b-carousel id="carousel1"
                 style="text-shadow: 1px 1px 2px #333;"
                 controls
                 indicators
@@ -17,6 +18,7 @@
           <p>{{quote.author}}</p>
       </b-carousel-slide>
     </b-carousel>
+      </section>
   </div>
 </template>
 
@@ -69,7 +71,4 @@ export default {
 
 
 <style>
-#about {
-  margin-top: 5em;
-}
 </style>

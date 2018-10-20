@@ -1,15 +1,12 @@
 <template>
-  <!-- <div id="app">
-    <div id="nav">
-      <app-navbar></app-navbar>
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div> -->
   <div id="app">
     <app-navbar></app-navbar>
     <router-view></router-view>
+    <footer class="py-3">
+      <div class="container">
+        <span class="text-muted">Footer</span>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -23,10 +20,17 @@ export default {
     }
   },
   components: {
-    appNavbar: Navbar
+    appNavbar: Navbar,
   },
   created(){
     this.$store.dispatch('loginWithCreditials')
   }
 }
 </script>
+
+<style>
+footer {
+  background: #343a40;
+  color:white;
+}
+</style>
