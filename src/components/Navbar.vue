@@ -1,7 +1,7 @@
 <template>
     <div>
         <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-        <a class="navbar-brand" href="#">My Vue APIs</a>
+        <a class="navbar-brand" href="/">My Vue APIs</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -13,13 +13,7 @@
                 <li class="nav-item">
                     <router-link to="/about"> About</router-link>
                 </li>
-                <li class="nav-item">
-                    <router-link to="/gadget"> Gadget</router-link>
-                </li>
             </ul>
-            <div class="mr-sm-2">
-                
-            </div>
             <div class="mr-sm-2">
                 <app-weather></app-weather>
             </div>
@@ -68,7 +62,7 @@ export default {
     methods: {
         onLogin() {
             this.$store.dispatch('loginWithFB')
-            console.log('after login ' ,this.$store.getters.user)
+            // console.log('after login ' ,this.$store.getters.user)
         },
         onLogout() {
             this.userModalShow = !this.userModalShow

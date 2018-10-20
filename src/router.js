@@ -22,11 +22,6 @@ export default new Router({
       component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
     },
     {
-      path: '/gadget',
-      name: 'gadget',
-      component: () => import(/* webpackChunkName: "about" */ './views/Gadget.vue')
-    },
-    {
       path: '/userProfile/:userId',
       name: 'userProfile',
       component: () => import(/* webpackChunkName: "about" */ './views/userProfile.vue'),

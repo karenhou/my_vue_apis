@@ -97,7 +97,7 @@ export default {
         })
       },
       firestoreRssList: function() {
-        console.log(this.$store.getters.content)
+        // console.log(this.$store.getters.content)
         return this.$store.getters.content
       }
   },
