@@ -1,14 +1,12 @@
 <template>
-    <div class="profile container">
-        <div class="jumbotron">
+    <div class="container my-5 py-5">
+        <div class="jumbotron py-5">
             <h1>User Profile: {{this.$store.getters.user.data.displayName}}</h1>
             <div class="row sub-title">
                 <div class="col">
                     {{ this.$store.getters.user.data.email}}
                 </div>
             </div>
-            
-            <p><span></span><span></span></p>
             <hr class="my-4">
             <h4>Saved RSS:</h4>
             <div class="row" >

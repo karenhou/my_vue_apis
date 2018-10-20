@@ -1,7 +1,7 @@
 <template>
   <div class="album pt-4 pb-5 bg-light">
     <div class="text-center">
-    <button class="btn btn-primary" @click="rssModalShow = !rssModalShow">Rss Reader <i class="fas fa-plus-square icon-size"></i></button>
+    <button class="btn btn-default" id="add-rss" @click="rssModalShow = !rssModalShow">Rss Reader <i class="fas fa-plus-square icon-size"></i></button>
     <b-modal v-model="rssModalShow">
         <p>Pick a RSS you would like to add to page</p>
         <select v-model="selected">
@@ -25,7 +25,7 @@
           <div class="card text-center" >
             <div class="card-body">
                 <h2 class="card-title">{{x.data.feed.title}}</h2>
-                <button class="btn btn-outline-danger btn-sm" @click="removeRss(x.name)"><i class="far fa-trash-alt icon-size"></i></button>
+                <button class="btn btn-outline-dark btn-sm" id="rm-rss" @click="removeRss(x.name)"><i class="far fa-trash-alt icon-size"></i></button>
                 <h6 class="card-subtitle mb-2 text-muted"></h6>
                 <p class="card-text">
                     <ul v-for="(x, index) in x.data.items" class="text-left" :key=index>
@@ -133,8 +133,25 @@ export default {
   margin-left: 1em;
 }
 
-.apiBtn {
-  background-color: #ffc500;
+#add-rss {
   color: white;
+  background: #1A483F;
 }
+
+#rm-rss {
+  color: black;
+}
+
+a {
+  color: #688882;
+}
+
+a:hover {
+  color: #1A483F;
+}
+
+.card-title {
+  color: #70121F;
+}
+
 </style>

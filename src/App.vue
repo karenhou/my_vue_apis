@@ -2,7 +2,7 @@
   <div id="app">
     <app-navbar></app-navbar>
     <router-view></router-view>
-    <footer class="py-3">
+    <footer class="py-3 myFooter">
       <div class="container">
         <span class="text-muted">Footer</span>
       </div>
@@ -29,7 +29,7 @@ export default {
 </script>
 
 <style>
-footer {
+.myFooter {
   background: #343a40;
   color:white;
 }

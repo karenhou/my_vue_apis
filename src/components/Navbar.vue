@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div id="nav-app">
         <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
         <a class="navbar-brand" href="/">My Vue APIs</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,6 @@ export default {
     border-radius: 50%;
     width: 2.5em !important;
 }
-
 </style>
 
 
