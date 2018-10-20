@@ -1,6 +1,6 @@
 <template>
     <div class="profile container">
-        <div class="jumbotron text-center">
+        <div class="jumbotron">
             <h1>User Profile: {{this.$store.getters.user.data.displayName}}</h1>
             <div class="row sub-title">
                 <div class="col">
@@ -17,7 +17,7 @@
                 </div>
             </div>
         </div>
-        <div class="jumbotron">
+        <!-- <div class="jumbotron">
             <div class="row ">
                 <div class="col-md-4">
                     <img src="https://via.placeholder.com/100x205" class="w-100">
@@ -32,7 +32,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </template>
 
