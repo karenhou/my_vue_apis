@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div>
     <app-navbar></app-navbar>
     <router-view></router-view>
     <footer class="py-3 myFooter">
